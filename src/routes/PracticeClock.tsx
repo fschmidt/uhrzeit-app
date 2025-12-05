@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Layout, Button } from '../components';
-import { InteractiveClock, speakTime, getBrowserLanguage } from '../components/InteractiveClock';
+import { InteractiveClock, speakTime, getActiveLanguage } from '../components/InteractiveClock';
 import { useSettings } from '../context';
 import styles from './PracticeClock.module.css';
 
@@ -23,7 +23,7 @@ export function PracticeClock() {
   const handleSpeak = () => {
     if (!settings.soundEnabled) return;
     setIsSpeaking(true);
-    speakTime(hour, minute);
+    speakTime(hour, minute, settings.language);
     setTimeout(() => setIsSpeaking(false), 2500);
   };
 
@@ -31,7 +31,7 @@ export function PracticeClock() {
     navigate('/menu');
   };
 
-  const browserLang = getBrowserLanguage();
+  const activeLang = getActiveLanguage(settings.language);
 
   return (
     <Layout title="Uhrzeiten üben">
@@ -58,7 +58,7 @@ export function PracticeClock() {
           >
             <span className={styles.speakIcon}>{isSpeaking ? '🔉' : '🔊'}</span>
             <span>Uhrzeit anhören</span>
-            <span className={styles.langFlag}>{browserLang === 'de' ? '🇩🇪' : '🇬🇧'}</span>
+            <span className={styles.langFlag}>{activeLang === 'de' ? '🇩🇪' : '🇬🇧'}</span>
           </button>
         )}
 

@@ -95,6 +95,24 @@ export function Settings() {
           </div>
         </section>
 
+        {/* Sprache */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>🌍 Sprache</h2>
+          <div className={styles.languageGrid}>
+            {LANGUAGE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleLanguageChange(option.value)}
+                className={`${styles.languageCard} ${
+                  settings.language === option.value ? styles.languageCardSelected : ''
+                }`}
+              >
+                <span className={styles.languageLabel}>{option.label}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+
         {/* Funktionen */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>🎛️ Funktionen</h2>

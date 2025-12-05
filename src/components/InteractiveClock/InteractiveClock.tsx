@@ -23,20 +23,31 @@ function angleToMinute(angle: number): number {
   return Math.round(angle / 6) % 60;
 }
 
+/** Spracheinstellung-Typ */
+export type LanguageOption = 'auto' | 'de' | 'en';
+
 /** Ermittelt die Browsersprache */
 export function getBrowserLanguage(): 'de' | 'en' {
   const lang = navigator.language || 'de';
   return lang.startsWith('de') ? 'de' : 'en';
 }
 
+/** Ermittelt die aktive Sprache basierend auf der Einstellung */
+export function getActiveLanguage(setting: LanguageOption): 'de' | 'en' {
+  if (setting === 'auto') {
+    return getBrowserLanguage();
+  }
+  return setting;
+}
+
 /** Spricht die Uhrzeit aus */
-export function speakTime(hour: number, minute: number): void {
+export function speakTime(hour: number, minute: number, languageSetting: LanguageOption = 'auto'): void {
   if (!('speechSynthesis' in window)) {
     return;
   }
   window.speechSynthesis.cancel();
-  
-  const language = getBrowserLanguage();
+
+  const language = getActiveLanguage(languageSetting);
   let text = '';
   const hour12 = hour % 12 || 12;
   const hour24 = hour;
