@@ -25,12 +25,12 @@ export interface ClockTheme {
   icon: string;
   description: string;
   colors: ClockThemeColors;
-  decorations: 'tower' | 'cuckoo' | 'watch';
+  decorations: 'tower' | 'cuckoo' | 'watch' | 'learning';
   useRomanNumerals: boolean;
 }
 
 /** Verfügbare Theme-IDs */
-export type ClockThemeId = 'tower' | 'cuckoo' | 'watch';
+export type ClockThemeId = 'tower' | 'cuckoo' | 'watch' | 'learning';
 
 /** Alle verfügbaren Uhr-Themes */
 export const CLOCK_THEMES: Record<ClockThemeId, ClockTheme> = {
@@ -98,6 +98,28 @@ export const CLOCK_THEMES: Record<ClockThemeId, ClockTheme> = {
       handleMinute: '#1976d2',
     },
     decorations: 'watch',
+    useRomanNumerals: false,
+  },
+  learning: {
+    name: 'Lernuhr',
+    icon: '🎓',
+    description: 'Bunte Lernuhr mit Minuten',
+    colors: {
+      outerRing: '#ffffff',
+      outerRingStroke: '#e0e0e0',
+      faceGradientStart: '#ffffff',
+      faceGradientEnd: '#ffffff',
+      hourMarker: '#333333',
+      minuteMarker: '#666666',
+      numbers: '#ffffff',
+      hourHand: '#1a1a1a',
+      minuteHand: '#1a1a1a',
+      centerOuter: '#ffffff',
+      centerInner: '#e53935',
+      handleHour: '#333333',
+      handleMinute: '#e53935',
+    },
+    decorations: 'learning',
     useRomanNumerals: false,
   },
 };

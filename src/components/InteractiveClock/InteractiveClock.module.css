@@ -8,6 +8,12 @@
 
 .clock {
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
+  /* Verhindert Browser-Gesten (Pull-to-Refresh, Scroll) beim Touch auf der Uhr */
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Verhindert Long-Press Kontextmenü auf iOS */
+  -webkit-touch-callout: none;
 }
 
 .handle {

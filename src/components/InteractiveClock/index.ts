@@ -3,4 +3,4 @@ export { InteractiveClock, speakTime, getBrowserLanguage, getActiveLanguage } fr
 export type { InteractiveClockProps, LanguageOption } from './InteractiveClock';
 export { CLOCK_THEMES, ROMAN_NUMERALS } from './ClockThemes';
 export type { ClockTheme, ClockThemeId, ClockThemeColors } from './ClockThemes';
-export { ClockDecorations, TowerDecorations, CuckooDecorations, WatchDecorations } from './ClockDecorations';
+export { ClockDecorations, TowerDecorations, CuckooDecorations, WatchDecorations, LearningClockDecorations } from './ClockDecorations';

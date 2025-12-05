@@ -130,6 +130,7 @@ export function InteractiveClock({
   const colors = themeConfig.colors;
   const decorationType = themeConfig.decorations;
   const useRoman = themeConfig.useRomanNumerals;
+  const isLearningTheme = theme === 'learning';
 
   const hourDegrees = ((hour % 12) * 30) + (minute / 60) * 30;
   const minuteDegrees = minute * 6;
@@ -179,11 +180,15 @@ export function InteractiveClock({
 
   useEffect(() => {
     if (isDragging) {
-      const onMove = (e: MouseEvent | TouchEvent) => handlePointerMove(e);
+      const onMove = (e: MouseEvent | TouchEvent) => {
+        e.preventDefault();
+        handlePointerMove(e);
+      };
       const onUp = () => handlePointerUp();
       window.addEventListener('mousemove', onMove);
       window.addEventListener('mouseup', onUp);
-      window.addEventListener('touchmove', onMove);
+      // passive: false erlaubt preventDefault() für Touch-Events
+      window.addEventListener('touchmove', onMove, { passive: false });
       window.addEventListener('touchend', onUp);
       return () => {
         window.removeEventListener('mousemove', onMove);
@@ -251,12 +256,13 @@ export function InteractiveClock({
       <svg
         ref={svgRef}
         viewBox="0 0 200 200"
-        style={{ 
+        style={{
           width: size,
           height: size,
           cursor: isDragging ? 'grabbing' : 'default',
         }}
         className={styles.clock}
+        onContextMenu={(e) => e.preventDefault()}
       >
         <defs>
           <linearGradient id={`clockFace-${theme}`} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -278,25 +284,29 @@ export function InteractiveClock({
           )}
         </defs>
         
-        {/* Äußerer Ring */}
-        <circle 
-          cx="100" cy="100" r="98" 
-          fill={theme === 'cuckoo' ? 'url(#woodPattern)' : theme === 'watch' ? 'url(#metalShine)' : colors.outerRing}
-          stroke={colors.outerRingStroke}
-          strokeWidth="2"
-        />
-        
-        {/* Zifferblatt */}
-        <circle cx="100" cy="100" r="90" fill={`url(#clockFace-${theme})`} />
-        
+        {/* Äußerer Ring - nicht für Lernuhr (wird durch Dekoration gezeichnet) */}
+        {!isLearningTheme && (
+          <circle
+            cx="100" cy="100" r="98"
+            fill={theme === 'cuckoo' ? 'url(#woodPattern)' : theme === 'watch' ? 'url(#metalShine)' : colors.outerRing}
+            stroke={colors.outerRingStroke}
+            strokeWidth="2"
+          />
+        )}
+
+        {/* Zifferblatt - nicht für Lernuhr */}
+        {!isLearningTheme && (
+          <circle cx="100" cy="100" r="90" fill={`url(#clockFace-${theme})`} />
+        )}
+
         {/* Theme-spezifische Dekorationen */}
         <ClockDecorations type={decorationType} />
-        
-        {/* Minuten- und Stundenmarkierungen */}
-        {minuteMarkers}
-        
-        {/* Stundenzahlen */}
-        {hourNumbers}
+
+        {/* Minuten- und Stundenmarkierungen - nicht für Lernuhr */}
+        {!isLearningTheme && minuteMarkers}
+
+        {/* Stundenzahlen - nicht für Lernuhr */}
+        {!isLearningTheme && hourNumbers}
         
         {/* Minutenzeiger */}
         <g
