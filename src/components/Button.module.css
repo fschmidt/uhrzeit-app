@@ -1,0 +1,91 @@
+/* Button Komponente Styles */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Nunito', 'Segoe UI', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+}
+
+.button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Varianten */
+.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+}
+
+.secondary {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  color: #2d3436;
+}
+
+.secondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e8ebf0 0%, #b5c4d8 100%);
+}
+
+.success {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.success:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0f8a80 0%, #32d971 100%);
+}
+
+.danger {
+  background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+  color: white;
+}
+
+.danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d42e42 0%, #e0533c 100%);
+}
+
+/* Größen */
+.small {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.medium {
+  padding: 0.875rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+.large {
+  padding: 1.25rem 2.5rem;
+  font-size: 1.5rem;
+}
+
+/* Modifikatoren */
+.fullWidth {
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.1) !important;
+}

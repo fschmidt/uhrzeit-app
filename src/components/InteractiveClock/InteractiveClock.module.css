@@ -1,0 +1,20 @@
+/* InteractiveClock Komponente Styles */
+
+.clockWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.clock {
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
+}
+
+.handle {
+  cursor: grab;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.handle:active {
+  cursor: grabbing;
+}
