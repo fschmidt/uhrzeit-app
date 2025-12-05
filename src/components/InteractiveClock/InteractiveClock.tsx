@@ -40,6 +40,63 @@ export function getActiveLanguage(setting: LanguageOption): 'de' | 'en' {
   return setting;
 }
 
+/**
+ * Findet die beste verfügbare Stimme für eine Sprache.
+ * iOS ignoriert oft utterance.lang, daher muss explizit eine Stimme gesetzt werden.
+ */
+function findVoiceForLanguage(lang: 'de' | 'en'): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices();
+  const targetLang = lang === 'de' ? 'de' : 'en';
+
+  // Priorität: Exakte Sprache > Sprache mit Region > Fallback
+  // Für iOS: Bevorzuge "compact" oder "enhanced" Stimmen
+  const exactMatch = voices.find(v =>
+    v.lang.toLowerCase().startsWith(targetLang) &&
+    (v.localService || v.name.toLowerCase().includes('compact') || v.name.toLowerCase().includes('enhanced'))
+  );
+
+  if (exactMatch) return exactMatch;
+
+  // Fallback: Irgendeine Stimme mit der richtigen Sprache
+  return voices.find(v => v.lang.toLowerCase().startsWith(targetLang)) || null;
+}
+
+/** Cache für Stimmen, da getVoices() auf iOS asynchron sein kann */
+let voicesLoaded = false;
+
+/** Lädt Stimmen und gibt ein Promise zurück */
+function ensureVoicesLoaded(): Promise<void> {
+  return new Promise((resolve) => {
+    if (voicesLoaded && window.speechSynthesis.getVoices().length > 0) {
+      resolve();
+      return;
+    }
+
+    // iOS lädt Stimmen asynchron
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      voicesLoaded = true;
+      resolve();
+      return;
+    }
+
+    // Warte auf voiceschanged Event (iOS/Safari)
+    const handleVoicesChanged = () => {
+      voicesLoaded = true;
+      window.speechSynthesis.removeEventListener('voiceschanged', handleVoicesChanged);
+      resolve();
+    };
+
+    window.speechSynthesis.addEventListener('voiceschanged', handleVoicesChanged);
+
+    // Timeout-Fallback falls Event nie kommt
+    setTimeout(() => {
+      voicesLoaded = true;
+      resolve();
+    }, 500);
+  });
+}
+
 /** Spricht die Uhrzeit aus */
 export function speakTime(hour: number, minute: number, languageSetting: LanguageOption = 'auto'): void {
   if (!('speechSynthesis' in window)) {
@@ -73,10 +130,20 @@ export function speakTime(hour: number, minute: number, languageSetting: Languag
     }
   }
 
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = language === 'de' ? 'de-DE' : 'en-US';
-  utterance.rate = 0.9;
-  window.speechSynthesis.speak(utterance);
+  // Stimmen laden und dann sprechen (wichtig für iOS)
+  ensureVoicesLoaded().then(() => {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = language === 'de' ? 'de-DE' : 'en-US';
+    utterance.rate = 0.9;
+
+    // iOS: Explizit eine Stimme setzen, da utterance.lang oft ignoriert wird
+    const voice = findVoiceForLanguage(language);
+    if (voice) {
+      utterance.voice = voice;
+    }
+
+    window.speechSynthesis.speak(utterance);
+  });
 }
 
 // ============================================
