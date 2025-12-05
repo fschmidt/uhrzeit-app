@@ -25,6 +25,8 @@ body {
   background: #667eea;
   min-height: 100vh;
   min-height: 100dvh;
+  /* Verhindert Pull-to-Refresh auf mobilen Geräten */
+  overscroll-behavior-y: contain;
 }
 
 /* Fokus-Styles für Barrierefreiheit */

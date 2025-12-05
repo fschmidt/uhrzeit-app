@@ -10,10 +10,13 @@ import { TitleScreen, MainMenu, GameClock, Settings, PracticeClock } from './rou
  * Provider für alle Child-Komponenten bereit.
  */
 function App() {
+  // Basename muss mit Vite base config übereinstimmen
+  const basename = import.meta.env.BASE_URL;
+
   return (
     <SettingsProvider>
       <ProgressProvider>
-        <BrowserRouter>
+        <BrowserRouter basename={basename}>
           <Routes>
             {/* Titelscreen - Startseite */}
             <Route path="/" element={<TitleScreen />} />

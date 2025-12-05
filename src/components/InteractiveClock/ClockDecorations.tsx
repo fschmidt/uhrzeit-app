@@ -118,117 +118,167 @@ export function WatchDecorations() {
   );
 }
 
-/** Farben für die 12 Stundensegmente der Lernuhr (Regenbogen) */
-const LEARNING_CLOCK_SEGMENT_COLORS = [
-  '#e53935', // 12 - Rot
-  '#ff7043', // 1 - Orange
-  '#ffb300', // 2 - Gelb-Orange
-  '#fdd835', // 3 - Gelb
-  '#c0ca33', // 4 - Gelbgrün
-  '#7cb342', // 5 - Hellgrün
-  '#43a047', // 6 - Grün
-  '#00897b', // 7 - Türkis
-  '#039be5', // 8 - Hellblau
-  '#5e35b1', // 9 - Violett
-  '#8e24aa', // 10 - Lila
-  '#d81b60', // 11 - Pink
+/**
+ * Farben für die 12 Stundensegmente der Lernuhr.
+ * Jedes Segment hat eine helle und dunkle Variante für den 3D-Effekt.
+ */
+const LEARNING_CLOCK_COLORS = [
+  { light: '#ef5350', dark: '#c62828' },   // 12 - Rot
+  { light: '#ff7043', dark: '#e64a19' },   // 1 - Orange
+  { light: '#ffb74d', dark: '#f57c00' },   // 2 - Gelb-Orange
+  { light: '#fff176', dark: '#fbc02d' },   // 3 - Gelb
+  { light: '#dce775', dark: '#afb42b' },   // 4 - Gelbgrün
+  { light: '#aed581', dark: '#689f38' },   // 5 - Hellgrün
+  { light: '#81c784', dark: '#388e3c' },   // 6 - Grün
+  { light: '#4db6ac', dark: '#00897b' },   // 7 - Türkis
+  { light: '#4fc3f7', dark: '#0288d1' },   // 8 - Hellblau
+  { light: '#9575cd', dark: '#512da8' },   // 9 - Violett
+  { light: '#ba68c8', dark: '#7b1fa2' },   // 10 - Lila
+  { light: '#f06292', dark: '#c2185b' },   // 11 - Pink
 ];
 
 /**
- * Dekorationen für die Lernuhr mit farbigen Segmenten und Minutenring.
+ * Erzeugt einen SVG-Pfad für ein Kreissegment.
+ */
+function createArcPath(
+  cx: number, cy: number,
+  innerR: number, outerR: number,
+  startAngle: number, endAngle: number
+): string {
+  const startRad = (startAngle - 90) * (Math.PI / 180);
+  const endRad = (endAngle - 90) * (Math.PI / 180);
+
+  const x1Inner = cx + innerR * Math.cos(startRad);
+  const y1Inner = cy + innerR * Math.sin(startRad);
+  const x1Outer = cx + outerR * Math.cos(startRad);
+  const y1Outer = cy + outerR * Math.sin(startRad);
+  const x2Inner = cx + innerR * Math.cos(endRad);
+  const y2Inner = cy + innerR * Math.sin(endRad);
+  const x2Outer = cx + outerR * Math.cos(endRad);
+  const y2Outer = cy + outerR * Math.sin(endRad);
+
+  return `
+    M ${x1Inner} ${y1Inner}
+    L ${x1Outer} ${y1Outer}
+    A ${outerR} ${outerR} 0 0 1 ${x2Outer} ${y2Outer}
+    L ${x2Inner} ${y2Inner}
+    A ${innerR} ${innerR} 0 0 0 ${x1Inner} ${y1Inner}
+    Z
+  `;
+}
+
+/**
+ * Dekorationen für die Lernuhr - originalgetreue Nachbildung.
+ * Features:
+ * - Minutenring außen mit weißen Kästchen und farbigen Zahlen
+ * - Farbige Stundensegmente (zweigeteilt hell/dunkel)
+ * - Große weiße 12-Stunden-Zahlen auf den Segmenten
+ * - 24-Stunden-Zahlen im inneren weißen Bereich
  */
 export function LearningClockDecorations() {
-  const centerX = 100;
-  const centerY = 100;
+  const cx = 100;
+  const cy = 100;
 
-  // Radien für verschiedene Bereiche
+  // Radien
   const outerRadius = 98;
+  const minuteRingOuter = 98;
   const minuteRingInner = 85;
   const hourSegmentOuter = 85;
-  const hourSegmentInner = 45;
-  const hour24Radius = 52;
+  const hourSegmentInner = 38;
+  const hour24Radius = 48;
+  const innerCircleRadius = 30;
 
-  // Erstelle die 12 farbigen Stundensegmente
-  const hourSegments = Array.from({ length: 12 }, (_, i) => {
-    const startAngle = (i * 30 - 90) * (Math.PI / 180);
-    const endAngle = ((i + 1) * 30 - 90) * (Math.PI / 180);
-
-    const x1Inner = centerX + hourSegmentInner * Math.cos(startAngle);
-    const y1Inner = centerY + hourSegmentInner * Math.sin(startAngle);
-    const x1Outer = centerX + hourSegmentOuter * Math.cos(startAngle);
-    const y1Outer = centerY + hourSegmentOuter * Math.sin(startAngle);
-    const x2Inner = centerX + hourSegmentInner * Math.cos(endAngle);
-    const y2Inner = centerY + hourSegmentInner * Math.sin(endAngle);
-    const x2Outer = centerX + hourSegmentOuter * Math.cos(endAngle);
-    const y2Outer = centerY + hourSegmentOuter * Math.sin(endAngle);
-
-    const pathD = `
-      M ${x1Inner} ${y1Inner}
-      L ${x1Outer} ${y1Outer}
-      A ${hourSegmentOuter} ${hourSegmentOuter} 0 0 1 ${x2Outer} ${y2Outer}
-      L ${x2Inner} ${y2Inner}
-      A ${hourSegmentInner} ${hourSegmentInner} 0 0 0 ${x1Inner} ${y1Inner}
-      Z
-    `;
-
+  // Farbige Minutenring-Segmente (Hintergrund für Minutenzahlen)
+  const minuteRingSegments = Array.from({ length: 12 }, (_, i) => {
+    const startAngle = i * 30;
+    const endAngle = (i + 1) * 30;
     return (
       <path
-        key={`segment-${i}`}
-        d={pathD}
-        fill={LEARNING_CLOCK_SEGMENT_COLORS[i]}
+        key={`minute-ring-${i}`}
+        d={createArcPath(cx, cy, minuteRingInner, minuteRingOuter, startAngle, endAngle)}
+        fill={LEARNING_CLOCK_COLORS[i].light}
       />
     );
   });
 
-  // Erstelle den Minutenring mit Zahlen 0-59
-  const minuteMarkers = Array.from({ length: 60 }, (_, i) => {
+  // Weiße Kästchen für Minutenzahlen
+  const minuteBoxes = Array.from({ length: 60 }, (_, i) => {
     const angle = (i * 6 - 90) * (Math.PI / 180);
-    const isMultipleOf5 = i % 5 === 0;
-    const textRadius = 91;
-
-    const x = centerX + textRadius * Math.cos(angle);
-    const y = centerY + textRadius * Math.sin(angle);
-
-    // Hintergrundfarbe basierend auf dem Stundensegment
-    const segmentIndex = Math.floor(i / 5);
-    const bgColor = LEARNING_CLOCK_SEGMENT_COLORS[segmentIndex];
+    const radius = 91.5;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    const rotation = i * 6;
 
     return (
-      <g key={`minute-${i}`}>
-        {/* Hintergrund-Box für Minutenzahl */}
-        <rect
-          x={x - 5}
-          y={y - 4}
-          width="10"
-          height="8"
-          fill={bgColor}
-          rx="1"
+      <rect
+        key={`minute-box-${i}`}
+        x={x - 4.5}
+        y={y - 5}
+        width="9"
+        height="10"
+        rx="2"
+        fill="white"
+        transform={`rotate(${rotation}, ${x}, ${y})`}
+      />
+    );
+  });
+
+  // Minutenzahlen
+  const minuteNumbers = Array.from({ length: 60 }, (_, i) => {
+    const angle = (i * 6 - 90) * (Math.PI / 180);
+    const radius = 91.5;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
+    const segmentIndex = Math.floor(i / 5);
+    const color = LEARNING_CLOCK_COLORS[segmentIndex].dark;
+
+    return (
+      <text
+        key={`minute-num-${i}`}
+        x={x}
+        y={y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        style={{
+          fontSize: '6px',
+          fontWeight: 'bold',
+          fill: color,
+          fontFamily: 'Arial, sans-serif',
+        }}
+      >
+        {i}
+      </text>
+    );
+  });
+
+  // Farbige Stundensegmente (zweigeteilt: außen hell, innen dunkel)
+  const hourSegments = Array.from({ length: 12 }, (_, i) => {
+    const startAngle = i * 30;
+    const endAngle = (i + 1) * 30;
+    const midRadius = (hourSegmentOuter + hourSegmentInner) / 2 + 5;
+
+    return (
+      <g key={`hour-segment-${i}`}>
+        {/* Äußerer heller Teil */}
+        <path
+          d={createArcPath(cx, cy, midRadius, hourSegmentOuter, startAngle, endAngle)}
+          fill={LEARNING_CLOCK_COLORS[i].light}
         />
-        {/* Minutenzahl */}
-        <text
-          x={x}
-          y={y}
-          textAnchor="middle"
-          dominantBaseline="central"
-          style={{
-            fontSize: isMultipleOf5 ? '5px' : '4px',
-            fontWeight: isMultipleOf5 ? 'bold' : 'normal',
-            fill: 'white',
-            fontFamily: 'Arial, sans-serif',
-          }}
-        >
-          {i}
-        </text>
+        {/* Innerer dunkler Teil */}
+        <path
+          d={createArcPath(cx, cy, hourSegmentInner, midRadius, startAngle, endAngle)}
+          fill={LEARNING_CLOCK_COLORS[i].dark}
+        />
       </g>
     );
   });
 
-  // 12-Stunden-Zahlen (große weiße Zahlen)
+  // Große weiße 12-Stunden-Zahlen
   const hourNumbers = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((num, i) => {
     const angle = (i * 30 - 90) * (Math.PI / 180);
-    const radius = 68;
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
+    const radius = 64;
+    const x = cx + radius * Math.cos(angle);
+    const y = cy + radius * Math.sin(angle);
 
     return (
       <text
@@ -238,7 +288,7 @@ export function LearningClockDecorations() {
         textAnchor="middle"
         dominantBaseline="central"
         style={{
-          fontSize: '14px',
+          fontSize: '18px',
           fontWeight: 'bold',
           fill: 'white',
           fontFamily: 'Arial, sans-serif',
@@ -249,11 +299,11 @@ export function LearningClockDecorations() {
     );
   });
 
-  // 24-Stunden-Zahlen (kleinere Zahlen innen: 13-23 und 0)
+  // 24-Stunden-Zahlen im inneren weißen Bereich
   const hour24Numbers = [0, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23].map((num, i) => {
     const angle = (i * 30 - 90) * (Math.PI / 180);
-    const x = centerX + hour24Radius * Math.cos(angle);
-    const y = centerY + hour24Radius * Math.sin(angle);
+    const x = cx + hour24Radius * Math.cos(angle);
+    const y = cy + hour24Radius * Math.sin(angle);
 
     return (
       <text
@@ -263,9 +313,9 @@ export function LearningClockDecorations() {
         textAnchor="middle"
         dominantBaseline="central"
         style={{
-          fontSize: '8px',
+          fontSize: '9px',
           fontWeight: 'normal',
-          fill: LEARNING_CLOCK_SEGMENT_COLORS[i],
+          fill: LEARNING_CLOCK_COLORS[i].dark,
           fontFamily: 'Arial, sans-serif',
         }}
       >
@@ -277,41 +327,24 @@ export function LearningClockDecorations() {
   return (
     <g>
       {/* Weiße Basis */}
-      <circle cx={centerX} cy={centerY} r={outerRadius} fill="white" />
+      <circle cx={cx} cy={cy} r={outerRadius} fill="white" />
 
-      {/* Minutenring-Hintergrund */}
-      <circle cx={centerX} cy={centerY} r={outerRadius} fill="none" stroke="#f5f5f5" strokeWidth="13" />
+      {/* Farbige Minutenring-Segmente */}
+      {minuteRingSegments}
+
+      {/* Weiße Kästchen für Minuten */}
+      {minuteBoxes}
+
+      {/* Minutenzahlen */}
+      {minuteNumbers}
 
       {/* Farbige Stundensegmente */}
       {hourSegments}
 
-      {/* Trennlinien zwischen Segmenten */}
-      {Array.from({ length: 12 }, (_, i) => {
-        const angle = (i * 30 - 90) * (Math.PI / 180);
-        const x1 = centerX + hourSegmentInner * Math.cos(angle);
-        const y1 = centerY + hourSegmentInner * Math.sin(angle);
-        const x2 = centerX + hourSegmentOuter * Math.cos(angle);
-        const y2 = centerY + hourSegmentOuter * Math.sin(angle);
-        return (
-          <line
-            key={`divider-${i}`}
-            x1={x1}
-            y1={y1}
-            x2={x2}
-            y2={y2}
-            stroke="white"
-            strokeWidth="1"
-          />
-        );
-      })}
+      {/* Weißer Innenkreis für 24h-Zahlen */}
+      <circle cx={cx} cy={cy} r={innerCircleRadius} fill="white" />
 
-      {/* Weißer Innenkreis */}
-      <circle cx={centerX} cy={centerY} r={hourSegmentInner} fill="white" />
-
-      {/* Minutenmarkierungen und -zahlen */}
-      {minuteMarkers}
-
-      {/* Stundenzahlen */}
+      {/* 12-Stunden-Zahlen */}
       {hourNumbers}
 
       {/* 24-Stunden-Zahlen */}
